@@ -5,30 +5,30 @@
   <title>🔔 Notification Subscribe</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(to right, #e0f7fa, #ffffff);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
 
     .card {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       background: #fff;
-      padding: 25px 20px;
+      padding: 20px 15px;
       border-radius: 16px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
       text-align: center;
-      width: 100%;
+      width: 90%;
       max-width: 400px;
       border-top: 6px solid #00bfa5;
+      z-index: 9999;
+      display: none;
     }
 
     h2 {
@@ -67,41 +67,56 @@
       font-size: 16px;
     }
 
+    .main-content {
+      display: none;
+      padding: 60px 20px;
+      text-align: center;
+    }
+
     @media (max-width: 480px) {
-      .card {
-        padding: 20px 15px;
-      }
-
-      h2 {
-        font-size: 20px;
-      }
-
-      p, .success-msg {
-        font-size: 14px;
-      }
-
-      button {
-        font-size: 15px;
-        padding: 10px 20px;
-      }
+      h2 { font-size: 20px; }
+      p, .success-msg { font-size: 14px; }
+      button { font-size: 15px; padding: 10px 20px; }
     }
   </style>
 </head>
 <body>
-  <div class="card">
+
+  <!-- 🔔 Popup Subscribe Card -->
+  <div class="card" id="subscribeCard">
     <h2>🔔 Notification Subscribe</h2>
     <p>Get instant updates directly from us.</p>
     <button onclick="subscribeUser()">Subscribe</button>
     <div id="msg" class="success-msg"></div>
   </div>
 
+  <!-- ✅ Your Main Home Content -->
+  <div class="main-content" id="mainContent">
+    <h1>🏠 Welcome to the Home Page</h1>
+    <p>This is the full content visible after subscription.</p>
+  </div>
+
   <script>
     const publicKey = "BHiIFzDhIj7tRGWbJl8hjxQVz7TqKn7EiTUtz8wWQ0IIIEhbYeYcvDzuBb74csUo3eGTkeISAz5s_evuP99Fz4w";
 
-    async function subscribeUser() {
-      try {
+    window.addEventListener("load", async () => {
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
         const registration = await navigator.serviceWorker.register("sw.js");
 
+        const existingSubscription = await registration.pushManager.getSubscription();
+        if (existingSubscription) {
+          // Already subscribed: show content directly
+          document.getElementById("mainContent").style.display = "block";
+        } else {
+          // Not subscribed: show popup
+          document.getElementById("subscribeCard").style.display = "block";
+        }
+      }
+    });
+
+    async function subscribeUser() {
+      try {
+        const registration = await navigator.serviceWorker.ready;
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(publicKey),
@@ -113,6 +128,12 @@
         });
 
         document.getElementById("msg").textContent = "✅ Subscribed successfully!";
+        
+        setTimeout(() => {
+          document.getElementById("subscribeCard").style.display = "none";
+          document.getElementById("mainContent").style.display = "block";
+        }, 1000);
+        
       } catch (err) {
         alert("❌ Subscription failed: " + err.message);
       }
@@ -125,5 +146,6 @@
       return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
     }
   </script>
+
 </body>
 </html>
