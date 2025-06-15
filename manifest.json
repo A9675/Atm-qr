@@ -1,0 +1,13 @@
+{
+  "name": "Web Push Notification",
+  "short_name": "PushNotify",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "description": "Receive push notifications from our server",
+  "icons": [{
+    "src": "icon.png",
+    "sizes": "192x192",
+    "type": "image/png"
+  }]
+}
