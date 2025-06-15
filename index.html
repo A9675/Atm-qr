@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Paytm Payment Gateway - Simple Form</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      max-width: 400px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    input[type="text"], input[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    input[type="submit"] {
+      background: #00baf2;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    input[type="submit"]:hover {
+      background: #007dbf;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Paytm Payment</h2>
+    <form method="post" action="https://securegw-stage.paytm.in/order/process">
+      <!-- ⚠️ Live ke liye use karein: https://securegw.paytm.in/order/process -->
+
+      <input type="hidden" name="MID" value="jxUnfw47605551580243">
+      <input type="hidden" name="WEBSITE" value="WEBSTAGING">
+      <input type="hidden" name="INDUSTRY_TYPE_ID" value="Retail">
+      <input type="hidden" name="CHANNEL_ID" value="WEB">
+
+      <label>Order ID:</label>
+      <input type="text" name="ORDER_ID" value="ORDERID12345">
+
+      <label>Customer ID:</label>
+      <input type="text" name="CUST_ID" value="CUST123">
+
+      <label>Amount:</label>
+      <input type="text" name="TXN_AMOUNT" value="1.00">
+
+      <label>Callback URL:</label>
+      <input type="text" name="CALLBACK_URL" value="https://yourdomain.com/callback">
+
+      <label>Checksum (required):</label>
+      <input type="text" name="CHECKSUMHASH" value="PUT_GENERATED_CHECKSUM_HERE">
+
+      <input type="submit" value="Pay Now with Paytm">
+    </form>
+  </div>
+</body>
+</html>
