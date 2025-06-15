@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <title>📢 नोटिफिकेशन भेजें</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #f2f2f2, #e0e0e0);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 500px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+      color: #444;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      background-color: #28a745;
+      color: white;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    #status {
+      margin-top: 20px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    @media (max-width: 480px) {
+      h2 { font-size: 20px; }
+      button { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>📢 नोटिफिकेशन भेजें</h2>
+    <form id="notifyForm">
+      <label for="title">शीर्षक (Title):</label>
+      <input type="text" id="title" placeholder="उदाहरण: नया ऑफर शुरू हुआ" required />
+
+      <label for="body">संदेश (Message):</label>
+      <textarea id="body" rows="4" placeholder="यह ऑफर सीमित समय के लिए है!" required></textarea>
+
+      <label for="url">क्लिक लिंक (URL):</label>
+      <input type="url" id="url" placeholder="https://example.com" required />
+
+      <button type="submit">📨 भेजें</button>
+    </form>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    document.getElementById("notifyForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const title = document.getElementById("title").value.trim();
+      const body = document.getElementById("body").value.trim();
+      const url = document.getElementById("url").value.trim();
+
+      const response = await fetch("https://script.google.com/macros/s/AKfycbxja9SGVweuSAtMRyMcOyc5yvtiTqwrURyz42sk2aj3XkxCysdoHnCiLMKsr_GuFCAO/exec",
+   ){
+        method: "POST",
+        body: JSON.stringify({ title, body, url }),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      const result = await response.text();
+      document.getElementById("status").innerText = "✅ " + result;
+    });
+  </script>
+
+</body>
+</html>
