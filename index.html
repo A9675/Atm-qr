@@ -19,7 +19,7 @@
       });
 
       // Data send to Google Sheet
-      fetch("https://script.google.com/macros/s/YOUR_GAS_URL/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbxq_ZhhJ249apgIUS2OPbLLLnfFCWmEwHK-PUr4RtBcqrtZ6HCUdYHhb5IHO9ojwnSk/exec ", {
         method: "POST",
         body: JSON.stringify(subscription),
       }).then(() => alert("Subscribed successfully!"));
