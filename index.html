@@ -1,35 +1,126 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Subscribe for Notifications</title>
+  <title>🔔 Notification Subscribe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #e0f7fa, #ffffff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 25px 20px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+      border-top: 6px solid #00bfa5;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      color: #00796b;
+      font-size: 22px;
+    }
+
+    p {
+      margin-bottom: 20px;
+      font-size: 16px;
+      color: #555;
+    }
+
+    button {
+      background-color: #00bfa5;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s ease;
+      width: 100%;
+      max-width: 250px;
+    }
+
+    button:hover {
+      background-color: #009688;
+    }
+
+    .success-msg {
+      margin-top: 20px;
+      color: #388e3c;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 20px 15px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      p, .success-msg {
+        font-size: 14px;
+      }
+
+      button {
+        font-size: 15px;
+        padding: 10px 20px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h2>🔔 Notification Subscribe</h2>
-  <button onclick="subscribeUser()">Subscribe</button>
+  <div class="card">
+    <h2>🔔 Notification Subscribe</h2>
+    <p>Get instant updates directly from us.</p>
+    <button onclick="subscribeUser()">Subscribe</button>
+    <div id="msg" class="success-msg"></div>
+  </div>
 
   <script>
     const publicKey = "BHiIFzDhIj7tRGWbJl8hjxQVz7TqKn7EiTUtz8wWQ0IIIEhbYeYcvDzuBb74csUo3eGTkeISAz5s_evuP99Fz4w";
 
     async function subscribeUser() {
-      const registration = await navigator.serviceWorker.register("sw.js");
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey),
-      });
+      try {
+        const registration = await navigator.serviceWorker.register("sw.js");
 
-      // Data send to Google Sheet
-      fetch("https://script.google.com/macros/s/AKfycbxq_ZhhJ249apgIUS2OPbLLLnfFCWmEwHK-PUr4RtBcqrtZ6HCUdYHhb5IHO9ojwnSk/exec ", {
-        method: "POST",
-        body: JSON.stringify(subscription),
-      }).then(() => alert("Subscribed successfully!"));
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
+
+        await fetch("https://script.google.com/macros/s/AKfycbxq_ZhhJ249apgIUS2OPbLLLnfFCWmEwHK-PUr4RtBcqrtZ6HCUdYHhb5IHO9ojwnSk/exec", {
+          method: "POST",
+          body: JSON.stringify(subscription),
+        });
+
+        document.getElementById("msg").textContent = "✅ Subscribed successfully!";
+      } catch (err) {
+        alert("❌ Subscription failed: " + err.message);
+      }
     }
 
     function urlBase64ToUint8Array(base64String) {
       const padding = '='.repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding)
-        .replace(/\-/g, '+')
-        .replace(/_/g, '/');
+      const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
       const rawData = window.atob(base64);
       return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
     }
