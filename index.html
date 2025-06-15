@@ -36,38 +36,39 @@
   </div>
 
   <script>
-    const publicKey = "-----BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCFpskriebsv1MtHfeDpDB+Bc+9
-ET/O6y6bVl1hMlasych83CWmCMqL4ZS1jNRFIQa8ZXXhC8YlRMXYDOXQdCNqNOY0
-SEzOFuSSGt1XZH0uLu7zXNcsyLJH1ShOvG5KV0+cgkckLf1j2IaTM/cu9hmbfHWh
-khL0curMtzVpMGzwPQIDAQAB
------END PUBLIC KEY-----";
-    const sheetURL = "https://script.google.com/macros/s/AKfycbweZfObOlfMMCbeg1cXpehPYstZRg-OFzuaOi2qjZCPZMFyHdhfCMuy7I-AxhMG_c8yzQ/exec"
-";
+    const publicKey = "BHiIFzDhIj7tRGWbJl8lqXo6Rk3KZ3bsN4Oj1LXLxK5oIGElz_NSR3Q76Xe8xy1uW5vxF74qOicY4Ij1JbAfqp0"; // Replace this with your actual VAPID public key
+
+    const sheetURL = "https://script.google.com/macros/s/AKfycbweZfObOlfMMCbeg1cXpehPYstZRg-OFzuaOi2qjZCPZMFyHdhfCMuy7I-AxhMG_c8yzQ/exec";
 
     async function subscribeUser() {
-      const registration = await navigator.serviceWorker.register("sw.js");
+      try {
+        const registration = await navigator.serviceWorker.register("sw.js");
 
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey),
-      });
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
 
-      const data = {
-        endpoint: subscription.endpoint,
-        p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey("p256dh")))),
-        auth: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey("auth")))),
-      };
+        const data = {
+          endpoint: subscription.endpoint,
+          p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey("p256dh")))),
+          auth: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey("auth")))),
+        };
 
-      fetch(sheetURL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
+        fetch(sheetURL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
 
-      document.getElementById("subscribeCard").style.display = "none";
-      alert("✅ Subscribed successfully!");
+        document.getElementById("subscribeCard").style.display = "none";
+        alert("✅ Subscribed successfully!");
+
+      } catch (error) {
+        console.error("Subscription failed:", error);
+        alert("❌ Subscription failed. See console for error.");
+      }
     }
 
     function urlBase64ToUint8Array(base64String) {
@@ -76,7 +77,7 @@ khL0curMtzVpMGzwPQIDAQAB
         .replace(/\-/g, "+")
         .replace(/_/g, "/");
       const rawData = window.atob(base64);
-      return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
+      return new Uint8Array([...rawData].map((char) => char.charCodeAt(0)));
     }
   </script>
 </body>
