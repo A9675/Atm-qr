@@ -1,14 +1,20 @@
-self.addEventListener('push', function (event) {
-  const data = event.data.json();
+self.addEventListener('push', function(e) {
+  const data = e.data.json();
   const options = {
     body: data.body,
     icon: 'icon.png',
-    data: { url: data.url }
+    data: {
+      url: data.url
+    }
   };
-  event.waitUntil(self.registration.showNotification(data.title, options));
+  e.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
 });
 
-self.addEventListener('notificationclick', function (event) {
-  event.notification.close();
-  event.waitUntil(clients.openWindow(event.notification.data.url));
+self.addEventListener('notificationclick', function(e) {
+  e.notification.close();
+  e.waitUntil(
+    clients.openWindow(e.notification.data.url)
+  );
 });
