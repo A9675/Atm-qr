@@ -2,103 +2,127 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>🔔 Subscribe for Notifications</title>
+  <title>🔔 Subscribe to Notifications</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="manifest.json">
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f6f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #e0eafc, #cfdef3);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
 
     .card {
-      background: #fff;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      text-align: center;
+      width: 100%;
       max-width: 400px;
-      width: 90%;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      padding: 30px 20px;
+      text-align: center;
+      animation: slideUp 0.8s ease-out forwards;
+      transform: translateY(50px);
+      opacity: 0;
+    }
+
+    @keyframes slideUp {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
 
     h2 {
-      margin-bottom: 20px;
+      font-size: 24px;
       color: #333;
+      margin-bottom: 10px;
     }
 
-    button {
+    p {
+      color: #666;
+      font-size: 15px;
+      margin-bottom: 20px;
+    }
+
+    #subscribeBtn {
+      padding: 12px 20px;
       background-color: #007bff;
-      color: white;
       border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
+      color: white;
       font-size: 16px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      width: 100%;
+      transition: background 0.3s ease;
     }
 
-    button:hover {
+    #subscribeBtn:hover {
       background-color: #0056b3;
     }
 
-    @media (max-width: 480px) {
-      .card {
-        padding: 20px;
-      }
-
-      button {
-        width: 100%;
-      }
+    #subscribeBtn:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
-  <div class="card" id="card">
-    <h2>🔔 Subscribe to Notifications</h2>
-    <button onclick="subscribeUser()">Subscribe</button>
+
+  <div class="card">
+    <h2>🔔 Enable Notifications</h2>
+    <p>Click below to subscribe and never miss an update.</p>
+    <button id="subscribeBtn">Subscribe Now</button>
   </div>
 
   <script>
-    const publicKey = 'BKsKVaQgQENg3aQh7MG0p6U5F_2YPwAbHVxNXXUzvjGxDt6t7gbnCTW9NFErdqdW0rhl_9SCzRToZX_F_TjQ7Es'; // <-- Aapka VAPID public key
-    const sheetScriptURL = 'https://script.google.com/macros/s/AKfycbweZfObOlfMMCbeg1cXpehPYstZRg-OFzuaOi2qjZCPZMFyHdhfCMuy7I-AxhMG_c8yzQ/exec';
-
-    async function subscribeUser() {
-      try {
-        const registration = await navigator.serviceWorker.register('sw.js');
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(publicKey)
-        });
-
-        // Send to Google Sheet
-        const response = await fetch(sheetScriptURL, {
-          method: 'POST',
-          body: JSON.stringify(subscription),
-          headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (response.ok) {
-          alert("✅ Subscribed & data sent!");
-          document.getElementById("card").style.display = "none";
-        } else {
-          alert("❌ Failed to send data.");
-        }
-      } catch (err) {
-        alert("❌ Error:\n" + err);
-      }
-    }
+    const publicKey = "BCe5z5fDXEgPp3maCCGr7CoAup7c83Y6qA_HjI5LfQkdGNrSyMhUDF8XuP1-Rec83Y1hIYfKlerNC_98yBqRinQ"; // Replace with your VAPID key
+    const scriptURL = "https://script.google.com/macros/s/AKfycbweZfObOlfMMCbeg1cXpehPYstZRg-OFzuaOi2qjZCPZMFyHdhfCMuy7I-AxhMG_c8yzQ/exec"; // Replace with your Apps Script URL
 
     function urlBase64ToUint8Array(base64String) {
-      const padding = '='.repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+      const padding = "=".repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/\-/g, "+").replace(/_/g, "/");
       const rawData = atob(base64);
-      return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+      return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
     }
+
+    async function subscribeUser() {
+      const registration = await navigator.serviceWorker.register('sw.js');
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey)
+      });
+
+      const data = {
+        endpoint: subscription.endpoint,
+        p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))),
+        auth: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth'))))
+      };
+
+      await fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
+
+      const btn = document.getElementById("subscribeBtn");
+      btn.innerText = "✅ Subscribed";
+      btn.disabled = true;
+    }
+
+    document.getElementById("subscribeBtn").addEventListener("click", () => {
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
+        subscribeUser().catch(err => alert("Subscription failed"));
+      } else {
+        alert("Push notifications not supported in this browser.");
+      }
+    });
   </script>
 </body>
 </html>
