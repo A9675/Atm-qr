@@ -7,77 +7,97 @@
   <link rel="manifest" href="manifest.json">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       text-align: center;
+      max-width: 400px;
+      width: 90%;
     }
-    #subscribeCard {
-      border: 2px solid #4CAF50;
-      padding: 20px;
-      border-radius: 10px;
-      display: inline-block;
-      background: #f9f9f9;
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
     }
+
     button {
-      padding: 10px 20px;
-      font-size: 18px;
-      background-color: #4CAF50;
+      background-color: #007bff;
       color: white;
       border: none;
-      border-radius: 5px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 20px;
+      }
+
+      button {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="subscribeCard">
-    <h2>🔔 Notification Subscribe</h2>
-    <p>Latest updates ke liye subscribe karein</p>
+  <div class="card" id="card">
+    <h2>🔔 Subscribe to Notifications</h2>
     <button onclick="subscribeUser()">Subscribe</button>
   </div>
 
   <script>
-    const publicKey = "BHiIFzDhIj7tRGWbJl8lqXo6Rk3KZ3bsN4Oj1LXLxK5oIGElz_NSR3Q76Xe8xy1uW5vxF74qOicY4Ij1JbAfqp0"; // Replace this with your actual VAPID public key
-
-    const sheetURL = "https://script.google.com/macros/s/AKfycbweZfObOlfMMCbeg1cXpehPYstZRg-OFzuaOi2qjZCPZMFyHdhfCMuy7I-AxhMG_c8yzQ/exec";
+    const publicKey = 'BKsKVaQgQENg3aQh7MG0p6U5F_2YPwAbHVxNXXUzvjGxDt6t7gbnCTW9NFErdqdW0rhl_9SCzRToZX_F_TjQ7Es'; // <-- Aapka VAPID public key
+    const sheetScriptURL = 'https://script.google.com/macros/s/AKfycbweZfObOlfMMCbeg1cXpehPYstZRg-OFzuaOi2qjZCPZMFyHdhfCMuy7I-AxhMG_c8yzQ/exec';
 
     async function subscribeUser() {
       try {
-        const registration = await navigator.serviceWorker.register("sw.js");
-
+        const registration = await navigator.serviceWorker.register('sw.js');
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(publicKey),
+          applicationServerKey: urlBase64ToUint8Array(publicKey)
         });
 
-        const data = {
-          endpoint: subscription.endpoint,
-          p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey("p256dh")))),
-          auth: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey("auth")))),
-        };
-
-        fetch(sheetURL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
+        // Send to Google Sheet
+        const response = await fetch(sheetScriptURL, {
+          method: 'POST',
+          body: JSON.stringify(subscription),
+          headers: { 'Content-Type': 'application/json' }
         });
 
-        document.getElementById("subscribeCard").style.display = "none";
-        alert("✅ Subscribed successfully!");
-
-      } catch (error) {
-        console.error("Subscription failed:", error);
-        alert("❌ Subscription failed. See console for error.");
+        if (response.ok) {
+          alert("✅ Subscribed & data sent!");
+          document.getElementById("card").style.display = "none";
+        } else {
+          alert("❌ Failed to send data.");
+        }
+      } catch (err) {
+        alert("❌ Error:\n" + err);
       }
     }
 
     function urlBase64ToUint8Array(base64String) {
-      const padding = "=".repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding)
-        .replace(/\-/g, "+")
-        .replace(/_/g, "/");
-      const rawData = window.atob(base64);
-      return new Uint8Array([...rawData].map((char) => char.charCodeAt(0)));
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+      const rawData = atob(base64);
+      return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
     }
   </script>
 </body>
