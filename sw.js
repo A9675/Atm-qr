@@ -3,18 +3,12 @@ self.addEventListener('push', function(e) {
   const options = {
     body: data.body,
     icon: 'icon.png',
-    data: {
-      url: data.url
-    }
+    data: { url: data.url }
   };
-  e.waitUntil(
-    self.registration.showNotification(data.title, options)
-  );
+  e.waitUntil(self.registration.showNotification(data.title, options));
 });
 
 self.addEventListener('notificationclick', function(e) {
   e.notification.close();
-  e.waitUntil(
-    clients.openWindow(e.notification.data.url)
-  );
+  e.waitUntil(clients.openWindow(e.notification.data.url));
 });
